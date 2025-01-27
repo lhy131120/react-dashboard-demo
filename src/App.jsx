@@ -30,7 +30,7 @@ function App() {
 	const [modalMode, setModalMode] = useState(null);
 	const [tempProduct, setTempProduct] = useState({});
 	const productModalRef = useRef(null);
-  const delProductModalRef = useRef(null);
+	const delProductModalRef = useRef(null);
 
 	const handleInputChange = (e) => {
 		const { id, value } = e.target;
@@ -76,7 +76,7 @@ function App() {
 	const getProducts = async () => {
 		try {
 			const res = await axios.get(`${API_BASE}/api/${API_PATH}/admin/products`);
-			console.log(res);
+			// console.log(res);
 			const _products = res.data.products;
 			// check callback data is Array or not
 			setProducts(Array.isArray(_products) ? _products : []);
@@ -115,11 +115,11 @@ function App() {
 	};
 
 	const handleOpenDeleteModal = (product) => {
-    if (!product) {
+		if (!product) {
 			console.error("Invalid product passed to handleOpenDeleteModal");
 			return;
 		}
-    setTempProduct(product)
+		setTempProduct(product);
 		const modal = Modal.getInstance(delProductModalRef.current);
 		modal.show();
 	};
@@ -132,9 +132,39 @@ function App() {
 		});
 	};
 
+	const handleImageChange = (e, index) => {
+		const { value } = e.target;
+
+		const newImages = tempProduct?.imagesUrl ? [...tempProduct.imagesUrl] : [""];
+
+		newImages[index] = value;
+
+		setTempProduct({
+			...tempProduct,
+			imagesUrl: newImages,
+		});
+	};
+
+  const handleAddImage = () => {
+    const newImages = [...tempProduct.imagesUrl, '']
+    setTempProduct({
+			...tempProduct,
+			imagesUrl: newImages,
+		});
+  }
+
+  const handleRemoveImage = () => {
+		const newImages = [...tempProduct.imagesUrl];
+    newImages.pop();
+		setTempProduct({
+			...tempProduct,
+			imagesUrl: newImages,
+		});
+	};
+
 	const createProduct = async () => {
-    try {
-      await axios.post(`${API_BASE}/api/${API_PATH}/admin/product/`, {
+		try {
+			await axios.post(`${API_BASE}/api/${API_PATH}/admin/product/`, {
 				data: {
 					...tempProduct,
 					origin_price: Number(tempProduct.origin_price),
@@ -142,29 +172,29 @@ function App() {
 					is_enabled: tempProduct.is_enabled ? 1 : 0,
 				},
 			});
-    } catch (error) {
-      console.log(`新增產品失敗: ${error.response.data.message}`);
-    }
-  };
+		} catch (error) {
+			console.log(`新增產品失敗: ${error.response.data.message}`);
+		}
+	};
 
 	const updateProduct = async () => {
-    try {
-      await axios.put(`${API_BASE}/api/${API_PATH}/admin/product/${tempProduct.id}`, {
+		try {
+			await axios.put(`${API_BASE}/api/${API_PATH}/admin/product/${tempProduct.id}`, {
 				data: {
 					...tempProduct,
 					origin_price: Number(tempProduct.origin_price),
 					price: Number(tempProduct.price),
 					is_enabled: tempProduct.is_enabled ? 1 : 0,
-          imagesUrl: Array.isArray(tempProduct?.imagesUrl) ? tempProduct.imagesUrl : [] 
+					imagesUrl: Array.isArray(tempProduct?.imagesUrl) ? tempProduct.imagesUrl : [],
 				},
 			});
-    } catch (error) {
-      console.log(`更新產品失敗: ${error.response.data.message}`);
-    }
-  };
+		} catch (error) {
+			console.log(`更新產品失敗: ${error.response.data.message}`);
+		}
+	};
 
-  const deleteProduct = async() => {
-    try {
+	const deleteProduct = async () => {
+		try {
 			await axios.delete(`${API_BASE}/api/${API_PATH}/admin/product/${tempProduct.id}`, {
 				data: {
 					...tempProduct,
@@ -177,7 +207,7 @@ function App() {
 		} catch (error) {
 			console.log(`刪除產品失敗: ${error.response.data.message}`);
 		}
-  }
+	};
 
 	const handleUpdateProduct = async () => {
 		const apiCall = modalMode === "new" ? createProduct : updateProduct;
@@ -191,15 +221,15 @@ function App() {
 		}
 	};
 
-  const handleDeleteProduct = async() => {
-    try {
-      await deleteProduct();
-      getProducts();
-      handleCloseDeleteModal();
-    } catch (error) {
-      console.log(`Error: ${error.response.data.message}`);
-    }
-  }
+	const handleDeleteProduct = async () => {
+		try {
+			await deleteProduct();
+			getProducts();
+			handleCloseDeleteModal();
+		} catch (error) {
+			console.log(`Error: ${error.response.data.message}`);
+		}
+	};
 
 	// useEffect
 	useEffect(() => {
@@ -210,9 +240,9 @@ function App() {
 		new Modal(productModalRef.current, {
 			backdrop: false,
 		});
-    new Modal(delProductModalRef.current, {
-      backdrop: false
-    });
+		new Modal(delProductModalRef.current, {
+			backdrop: false,
+		});
 	}, []);
 
 	return (
@@ -338,7 +368,7 @@ function App() {
 											</label>
 											<input
 												onChange={handleModalInputChange}
-												defaultValue={tempProduct.imageUrl}
+												value={tempProduct.imageUrl}
 												name="imageUrl"
 												type="text"
 												className="form-control"
@@ -347,11 +377,37 @@ function App() {
 										</div>
 										<img className="img-fluid" src={tempProduct.imageUrl} alt={tempProduct.title} />
 									</div>
-									<div>
-										<button className="btn btn-outline-primary btn-sm d-block w-100">新增圖片</button>
-									</div>
-									<div>
-										<button className="btn btn-outline-danger btn-sm d-block w-100">刪除圖片</button>
+									<div className="border border-2 border-dashed rounder-3 p-3">
+										{tempProduct.imagesUrl?.map((image, index) => (
+											<div key={index} className="mb-2">
+												<label htmlFor={`imagesUrl-${index + 1}`} className="form-label">
+													副圖{index + 1}
+												</label>
+												<input
+													onChange={(e) => handleImageChange(e, index)}
+													value={image}
+													id={`imagesUrl-${index + 1}`}
+													type="text"
+													placeholder={`圖片網址-${index + 1}`}
+													className="form-control mb-2"
+												/>
+												{image && <img className="img-fluid mb-2" src={image} alt={`副圖 ${index + 1}`} />}
+											</div>
+										))}
+										<div className="btn-group w-100">
+											{tempProduct?.imagesUrl?.length < 5 &&
+												tempProduct?.imagesUrl[tempProduct?.imagesUrl?.length - 1] !== "" &&
+												tempProduct?.imagesUrl[tempProduct?.imagesUrl?.length] !== "undefined" && (
+													<button onClick={handleAddImage} className="btn btn-outline-primary btn-sm w-100">
+														新增圖片
+													</button>
+												)}
+											{tempProduct?.imagesUrl?.length > 1 && (
+												<button onClick={handleRemoveImage} className="btn btn-outline-danger btn-sm w-100">
+													取消圖片
+												</button>
+											)}
+										</div>
 									</div>
 								</div>
 								<div className="col-sm-8">
