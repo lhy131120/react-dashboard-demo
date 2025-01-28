@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Modal } from "bootstrap";
-
 import "./assets/main.scss";
+
+import LoginPage from "./pages/LoginPage";
 
 const API_BASE = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
@@ -22,41 +23,39 @@ const defaultModalState = {
 };
 
 function App() {
-	const [formData, setFormData] = useState({
-		username: "",
-		password: "",
-	});
+	// const [formData, setFormData] = useState({
+	// 	username: "",
+	// 	password: "",
+	// });
 	const [isAuth, setIsAuth] = useState(false);
 	const [products, setProducts] = useState([]);
 	const [modalMode, setModalMode] = useState(null);
 	const [tempProduct, setTempProduct] = useState({});
 	const [pageInfo, setPageInfo] = useState({});
-	// const [isPagePrevious, setIsPagePrevious] = useState(false);
-	// const [isPageNext, setIsPageNext] = useState(false);
 	const productModalRef = useRef(null);
 	const delProductModalRef = useRef(null);
 
-	const handleInputChange = (e) => {
-		const { id, value } = e.target;
-		setFormData({
-			...formData,
-			[id]: value,
-		});
-	};
+	// const handleInputChange = (e) => {
+	// 	const { id, value } = e.target;
+	// 	setFormData({
+	// 		...formData,
+	// 		[id]: value,
+	// 	});
+	// };
 
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		try {
-			const res = await axios.post(`${API_BASE}/admin/signin`, formData);
-			const { expired, token } = res.data;
-			document.cookie = `hexToken=${token}; expires=${new Date(expired)}`;
-			axios.defaults.headers.common["Authorization"] = token;
-			getProducts();
-			setIsAuth(true);
-		} catch (err) {
-			console.error(err.response.data.message);
-		}
-	};
+	// const handleSubmit = async (e) => {
+	// 	e.preventDefault();
+	// 	try {
+	// 		const res = await axios.post(`${API_BASE}/admin/signin`, formData);
+	// 		const { expired, token } = res.data;
+	// 		document.cookie = `hexToken=${token}; expires=${new Date(expired)}`;
+	// 		axios.defaults.headers.common["Authorization"] = token;
+	// 		getProducts();
+	// 		setIsAuth(true);
+	// 	} catch (err) {
+	// 		console.error(err.response.data.message);
+	// 	}
+	// };
 
 	const checkAdminLogin = async () => {
 		const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, "$1");
@@ -80,7 +79,7 @@ function App() {
 	const getProducts = async (page = 1) => {
 		try {
 			const res = await axios.get(`${API_BASE}/api/${API_PATH}/admin/products?page=${page}`);
-			console.log(res.data);
+			// console.log(res.data);
 			const _products = res.data.products;
 			// check callback data is Array or not
 			setProducts(Array.isArray(_products) ? _products : []);
@@ -91,9 +90,9 @@ function App() {
 		}
 	};
 
-  const handleProductsPageChange = (page) => {
-    getProducts(page)
-  }
+	const handleProductsPageChange = (page) => {
+		getProducts(page);
+	};
 
 	const handleOpenProductModal = (modalMode, product) => {
 		// set Modal Mode for Change Modal Title
@@ -240,6 +239,24 @@ function App() {
 		}
 	};
 
+  const handleFileChange = async (e) => {
+    // console.log(e.target);
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('file-to-upload', file)
+    
+    try {
+      const res = await axios.post(`${API_BASE}/api/${API_PATH}/admin/upload`, formData);
+      const uploadImageUrl = res.data.imageUrl;
+      setTempProduct({
+        ...tempProduct,
+        imageUrl: uploadImageUrl
+      })
+    } catch (error) {
+      console.error(error.response.data.message)
+    }
+  }
+
 	// useEffect
 	useEffect(() => {
 		checkAdminLogin();
@@ -305,84 +322,55 @@ function App() {
 								))}
 							</tbody>
 						</table>
-						<div className="d-flex justify-content-center">
-							<nav>
-								<ul className="pagination">
-									<li className={`page-item ${!pageInfo.has_pre && "disabled"}`}>
-										<a
-											onClick={() => handleProductsPageChange(pageInfo.current_page - 1)}
-											className="page-link"
-											href="#"
-										>
-											上一頁
-										</a>
-									</li>
-
-									{Array.from({ length: pageInfo.total_pages }).map((el, index) => (
-										<li
-											data-key={index + 1}
-											key={index}
-											className={`page-item ${pageInfo.current_page === index + 1 && "active"}`}
-										>
-											<a onClick={() => handleProductsPageChange(index + 1)} className="page-link" href="javascript:;">
-												{index + 1}
+						{pageInfo.total_pages > 2 ? (
+							<div className="d-flex justify-content-center">
+								<nav>
+									<ul className="pagination">
+										<li className={`page-item ${!pageInfo.has_pre && "disabled"}`}>
+											<a
+												onClick={() => handleProductsPageChange(pageInfo.current_page - 1)}
+												className="page-link"
+												href="#"
+											>
+												上一頁
 											</a>
 										</li>
-									))}
 
-									<li className={`page-item ${!pageInfo.has_next && "disabled"}`}>
-										<a
-											onClick={() => handleProductsPageChange(pageInfo.current_page + 1)}
-											className="page-link"
-											href="#"
-										>
-											下一頁
-										</a>
-									</li>
-								</ul>
-							</nav>
-						</div>
+										{Array.from({ length: pageInfo.total_pages }).map((el, index) => (
+											<li
+												data-key={index + 1}
+												key={index}
+												className={`page-item ${pageInfo.current_page === index + 1 && "active"}`}
+											>
+												<a
+													onClick={() => handleProductsPageChange(index + 1)}
+													className="page-link"
+													href="javascript:;"
+												>
+													{index + 1}
+												</a>
+											</li>
+										))}
+
+										<li className={`page-item ${!pageInfo.has_next && "disabled"}`}>
+											<a
+												onClick={() => handleProductsPageChange(pageInfo.current_page + 1)}
+												className="page-link"
+												href="#"
+											>
+												下一頁
+											</a>
+										</li>
+									</ul>
+								</nav>
+							</div>
+						) : (
+							<></>
+						)}
 					</div>
 				</div>
 			) : (
-				<div className="container login">
-					<div className="row justify-content-center">
-						<h1 className="h3 mb-3 font-weight-normal">請先登入</h1>
-						<div className="col-8">
-							<form id="form" className="form-signin" onSubmit={handleSubmit}>
-								<div className="form-floating mb-3">
-									<input
-										type="email"
-										className="form-control"
-										id="username"
-										placeholder="name@example.com"
-										value={formData.username}
-										onChange={handleInputChange}
-										required
-										autoFocus
-									/>
-									<label htmlFor="username">Email address</label>
-								</div>
-								<div className="form-floating">
-									<input
-										type="password"
-										className="form-control"
-										id="password"
-										placeholder="Password"
-										value={formData.password}
-										onChange={handleInputChange}
-										required
-									/>
-									<label htmlFor="password">Password</label>
-								</div>
-								<button className="btn btn-lg btn-primary w-100 mt-3" type="submit">
-									登入
-								</button>
-							</form>
-						</div>
-					</div>
-					<p className="mt-5 mb-3 text-muted">&copy; 2024~∞ - 六角學院</p>
-				</div>
+				<LoginPage getProducts={getProducts} setIsAuth={setIsAuth} />
 			)}
 			<div
 				ref={productModalRef}
@@ -406,7 +394,19 @@ function App() {
 						</div>
 						<div className="modal-body text-start">
 							<div className="row">
-								<div className="col-sm-4">
+								<div className="col-md-4">
+									<div className="mb-5">
+										<label htmlFor="fileInput" className="form-label">
+											圖片上傳
+										</label>
+										<input
+											onChange={handleFileChange}
+											type="file"
+											accept=".jpg,.jpeg,.png"
+											className="form-control"
+											id="fileInput"
+										/>
+									</div>
 									<div className="mb-2">
 										<div className="mb-3">
 											<label htmlFor="imageUrl" className="form-label">
@@ -456,7 +456,7 @@ function App() {
 										</div>
 									</div>
 								</div>
-								<div className="col-sm-8">
+								<div className="col-md-8">
 									<div className="mb-3">
 										<label htmlFor="title" className="form-label">
 											標題
