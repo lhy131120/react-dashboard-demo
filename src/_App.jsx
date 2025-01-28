@@ -18,7 +18,6 @@ const defaultModalState = {
 	content: "",
 	is_enabled: 0,
 	imagesUrl: [""],
-	customObj: "",
 };
 
 function App() {
@@ -30,9 +29,6 @@ function App() {
 	const [products, setProducts] = useState([]);
 	const [modalMode, setModalMode] = useState(null);
 	const [tempProduct, setTempProduct] = useState({});
-	const [pageInfo, setPageInfo] = useState({});
-	// const [isPagePrevious, setIsPagePrevious] = useState(false);
-	// const [isPageNext, setIsPageNext] = useState(false);
 	const productModalRef = useRef(null);
 	const delProductModalRef = useRef(null);
 
@@ -77,23 +73,18 @@ function App() {
 		}
 	};
 
-	const getProducts = async (page = 1) => {
+	const getProducts = async () => {
 		try {
-			const res = await axios.get(`${API_BASE}/api/${API_PATH}/admin/products?page=${page}`);
-			console.log(res.data);
+			const res = await axios.get(`${API_BASE}/api/${API_PATH}/admin/products`);
+			// console.log(res);
 			const _products = res.data.products;
 			// check callback data is Array or not
 			setProducts(Array.isArray(_products) ? _products : []);
-			setPageInfo(res.data.pagination);
 		} catch (error) {
 			console.error(error.response.data.message);
 			setProducts([]);
 		}
 	};
-
-  const handleProductsPageChange = (page) => {
-    getProducts(page)
-  }
 
 	const handleOpenProductModal = (modalMode, product) => {
 		// set Modal Mode for Change Modal Title
@@ -154,17 +145,17 @@ function App() {
 		});
 	};
 
-	const handleAddImage = () => {
-		const newImages = [...tempProduct.imagesUrl, ""];
-		setTempProduct({
+  const handleAddImage = () => {
+    const newImages = [...tempProduct.imagesUrl, '']
+    setTempProduct({
 			...tempProduct,
 			imagesUrl: newImages,
 		});
-	};
+  }
 
-	const handleRemoveImage = () => {
+  const handleRemoveImage = () => {
 		const newImages = [...tempProduct.imagesUrl];
-		newImages.pop();
+    newImages.pop();
 		setTempProduct({
 			...tempProduct,
 			imagesUrl: newImages,
@@ -223,7 +214,7 @@ function App() {
 
 		try {
 			await apiCall();
-			getProducts(pageInfo.current_page);
+			getProducts();
 			handleCloseProductModal();
 		} catch (error) {
 			console.error(error.response.data.message);
@@ -305,43 +296,6 @@ function App() {
 								))}
 							</tbody>
 						</table>
-						<div className="d-flex justify-content-center">
-							<nav>
-								<ul className="pagination">
-									<li className={`page-item ${!pageInfo.has_pre && "disabled"}`}>
-										<a
-											onClick={() => handleProductsPageChange(pageInfo.current_page - 1)}
-											className="page-link"
-											href="#"
-										>
-											上一頁
-										</a>
-									</li>
-
-									{Array.from({ length: pageInfo.total_pages }).map((el, index) => (
-										<li
-											data-key={index + 1}
-											key={index}
-											className={`page-item ${pageInfo.current_page === index + 1 && "active"}`}
-										>
-											<a onClick={() => handleProductsPageChange(index + 1)} className="page-link" href="javascript:;">
-												{index + 1}
-											</a>
-										</li>
-									))}
-
-									<li className={`page-item ${!pageInfo.has_next && "disabled"}`}>
-										<a
-											onClick={() => handleProductsPageChange(pageInfo.current_page + 1)}
-											className="page-link"
-											href="#"
-										>
-											下一頁
-										</a>
-									</li>
-								</ul>
-							</nav>
-						</div>
 					</div>
 				</div>
 			) : (
