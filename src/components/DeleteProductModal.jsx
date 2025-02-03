@@ -1,24 +1,26 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+import PropTypes from "prop-types";
 import axios from "axios";
 import { Modal } from "bootstrap";
 
 const API_BASE = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
-const DeleteProductModal = ({tempProduct, getProducts, isOpen, setIsOpen}) => {
-	const [modalData, setModalData] = useState(tempProduct);
+const DeleteProductModal = ({ tempProduct, getProducts, isOpen, setIsOpen }) => {
 
-	useEffect(() => {
-		setModalData({ ...tempProduct });
-	}, [tempProduct]);
+	// const [modalData, setModalData] = useState(tempProduct);
 
-	const delProductModalRef = useRef(null);
+  const delProductModalRef = useRef(null);
 
-	useEffect(() => {
-		new Modal(delProductModalRef.current, {
-			backdrop: false,
-		});
-	}, []);
+  useEffect(() => {
+    new Modal(delProductModalRef.current, {
+      backdrop: false,
+    });
+  }, []);
+
+	// useEffect(() => {
+	// 	setModalData({ ...tempProduct });
+	// }, [tempProduct]);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -29,13 +31,13 @@ const DeleteProductModal = ({tempProduct, getProducts, isOpen, setIsOpen}) => {
 
 	const deleteProduct = async () => {
 		try {
-			await axios.delete(`${API_BASE}/api/${API_PATH}/admin/product/${modalData.id}`, {
+			await axios.delete(`${API_BASE}/api/${API_PATH}/admin/product/${tempProduct.id}`, {
 				data: {
-					...modalData,
-					origin_price: Number(modalData.origin_price),
-					price: Number(modalData.price),
-					is_enabled: modalData.is_enabled ? 1 : 0,
-					imagesUrl: Array.isArray(modalData?.imagesUrl) ? modalData.imagesUrl : [],
+					...tempProduct,
+					origin_price: Number(tempProduct.origin_price),
+					price: Number(tempProduct.price),
+					is_enabled: tempProduct.is_enabled ? 1 : 0,
+					imagesUrl: Array.isArray(tempProduct?.imagesUrl) ? tempProduct.imagesUrl : [],
 				},
 			});
 		} catch (error) {
