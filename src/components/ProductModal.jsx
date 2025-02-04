@@ -77,6 +77,19 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 	};
 
 	const createProduct = async () => {
+		const discountPercent = Number(modalData.discountPercent);
+
+		// 檢查是否為有效數字
+		if (isNaN(discountPercent)) {
+			alert("折扣必須是有效數字");
+			return;
+		}
+		// 檢查範圍
+		if (discountPercent < 0 || discountPercent > 99) {
+			alert("折扣必須介於 0-99 之間");
+			return;
+		}
+
 		try {
 			await axios.post(`${API_BASE}/api/${API_PATH}/admin/product/`, {
 				data: {
@@ -84,6 +97,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 					origin_price: Number(modalData.origin_price),
 					price: Number(modalData.price),
 					is_enabled: modalData.is_enabled ? 1 : 0,
+					discountPercent,
 				},
 			});
 			handleCloseProductModal();
@@ -94,6 +108,18 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 	};
 
 	const updateProduct = async () => {
+    const discountPercent = Number(modalData.discountPercent);
+
+		if (isNaN(discountPercent)) {
+			alert("折扣必須是有效數字");
+			return;
+		}
+
+		if (discountPercent < 0 || discountPercent > 99) {
+			alert("折扣必須介於 0-99 之間");
+			return;
+		}
+    
 		try {
 			await axios.put(`${API_BASE}/api/${API_PATH}/admin/product/${modalData.id}`, {
 				data: {
@@ -102,6 +128,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 					price: Number(modalData.price),
 					is_enabled: modalData.is_enabled ? 1 : 0,
 					imagesUrl: Array.isArray(modalData?.imagesUrl) ? modalData.imagesUrl : [],
+          discountPercent: Number(modalData.discountPercent),
 				},
 			});
 			handleCloseProductModal();
@@ -306,6 +333,25 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 											/>
 										</div>
 									</div>
+									<div className="row">
+										<div className="mb-3 col-md-6">
+											<label htmlFor="discountPercent" className="form-label">
+												限時折扣 <small className="text-danger">(請輸入0-99)</small>
+											</label>
+											<input
+												onChange={handleModalInputChange}
+												value={modalData.discountPercent || 0}
+												name="discountPercent"
+												id="discountPercent"
+												type="number"
+												min="0"
+                        max="99"
+                        step="1"
+												className="form-control"
+												placeholder="請輸入限時折扣"
+											/>
+										</div>
+									</div>
 									<hr />
 
 									<div className="mb-3">
@@ -358,7 +404,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 								onClick={() => handleCloseProductModal()}
 								type="button"
 								className="btn btn-outline-secondary"
-                aria-label="Close"
+								aria-label="Close"
 							>
 								取消
 							</button>

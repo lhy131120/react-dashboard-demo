@@ -16,7 +16,7 @@ const defaultModalState = {
   content: "",
   is_enabled: 0,
   imagesUrl: [""],
-  discountRange: 0,
+  discountPercent: "",
 };
 
 const API_BASE = import.meta.env.VITE_BASE_URL;
