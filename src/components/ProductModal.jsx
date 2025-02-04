@@ -100,6 +100,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 					discountPercent,
 				},
 			});
+      alert(`新增產品成功!!`);
 			handleCloseProductModal();
 		} catch (error) {
 			console.log(`新增產品失敗: ${error.response.data.message}`);
@@ -119,7 +120,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 			alert("折扣必須介於 0-99 之間");
 			return;
 		}
-    
+
 		try {
 			await axios.put(`${API_BASE}/api/${API_PATH}/admin/product/${modalData.id}`, {
 				data: {
@@ -131,6 +132,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
           discountPercent: Number(modalData.discountPercent),
 				},
 			});
+      alert(`更新產品成功!!`)
 			handleCloseProductModal();
 		} catch (error) {
 			console.log(`更新產品失敗: ${error.response.data.message}`);
