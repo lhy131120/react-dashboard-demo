@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
 import axios from "axios";
 import { Modal } from "bootstrap";
 
@@ -15,6 +16,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 	}, [tempProduct]);
 
 	const productModalRef = useRef(null);
+  const closeButtonRef = useRef(null);
 
 	useEffect(() => {
 		new Modal(productModalRef.current, {
@@ -26,6 +28,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 		if (isOpen) {
 			const modal = Modal.getInstance(productModalRef.current);
 			modal.show();
+      closeButtonRef.current?.focus();
 		}
 	}, [isOpen]);
 
@@ -83,10 +86,10 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 					is_enabled: modalData.is_enabled ? 1 : 0,
 				},
 			});
-      handleCloseProductModal();
+			handleCloseProductModal();
 		} catch (error) {
 			console.log(`新增產品失敗: ${error.response.data.message}`);
-      alert(`新增產品失敗: ${error.response.data.message}`);
+			alert(`新增產品失敗: ${error.response.data.message}`);
 		}
 	};
 
@@ -101,7 +104,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 					imagesUrl: Array.isArray(modalData?.imagesUrl) ? modalData.imagesUrl : [],
 				},
 			});
-      handleCloseProductModal();
+			handleCloseProductModal();
 		} catch (error) {
 			console.log(`更新產品失敗: ${error.response.data.message}`);
 		}
@@ -113,7 +116,6 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 		try {
 			await apiCall();
 			getProducts(pageInfo.current_page);
-			// handleCloseProductModal();
 		} catch (error) {
 			console.log(`${error.response.data.message}`);
 		}
@@ -137,15 +139,17 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 		}
 	};
 
+
+
 	return (
 		<>
 			<div
 				ref={productModalRef}
 				id="productModal"
 				className="modal fade"
-				tabIndex="-1"
+				role="dialog"
 				aria-labelledby="productModalLabel"
-				aria-hidden="true"
+				aria-hidden={!isOpen}
 				style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
 			>
 				<div className="modal-dialog modal-xl">
@@ -181,14 +185,14 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 											</label>
 											<input
 												onChange={handleModalInputChange}
-												value={modalData.imageUrl}
+												value={modalData.imageUrl || ""}
 												name="imageUrl"
 												type="text"
 												className="form-control"
 												placeholder="請輸入圖片連結"
 											/>
 										</div>
-										<img className="img-fluid" src={modalData.imageUrl} alt={modalData.title} />
+										<img className="img-fluid" src={modalData.imageUrl || ""} alt={modalData.title} />
 									</div>
 									<div className="border border-2 border-dashed rounder-3 p-3">
 										{modalData.imagesUrl?.map((image, index) => (
@@ -198,7 +202,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 												</label>
 												<input
 													onChange={(e) => handleImageChange(e, index)}
-													value={image}
+													value={image || ""}
 													id={`imagesUrl-${index + 1}`}
 													type="text"
 													placeholder={`圖片網址-${index + 1}`}
@@ -230,7 +234,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 										</label>
 										<input
 											onChange={handleModalInputChange}
-											value={modalData.title}
+											value={modalData.title || ""}
 											name="title"
 											id="title"
 											type="text"
@@ -246,7 +250,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 											</label>
 											<input
 												onChange={handleModalInputChange}
-												value={modalData.category}
+												value={modalData.category || ""}
 												name="category"
 												id="category"
 												type="text"
@@ -260,7 +264,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 											</label>
 											<input
 												onChange={handleModalInputChange}
-												value={modalData.unit}
+												value={modalData.unit || ""}
 												name="unit"
 												id="unit"
 												type="text"
@@ -277,7 +281,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 											</label>
 											<input
 												onChange={handleModalInputChange}
-												value={modalData.origin_price}
+												value={modalData.origin_price || 0}
 												name="origin_price"
 												id="origin_price"
 												type="number"
@@ -292,7 +296,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 											</label>
 											<input
 												onChange={handleModalInputChange}
-												value={modalData.price}
+												value={modalData.price || 0}
 												name="price"
 												id="price"
 												type="number"
@@ -310,7 +314,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 										</label>
 										<textarea
 											onChange={handleModalInputChange}
-											value={modalData.description}
+											value={modalData.description || ""}
 											name="description"
 											id="description"
 											className="form-control"
@@ -323,7 +327,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 										</label>
 										<textarea
 											onChange={handleModalInputChange}
-											value={modalData.content}
+											value={modalData.content || ""}
 											name="content"
 											id="content"
 											className="form-control"
@@ -334,7 +338,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 										<div className="form-check">
 											<input
 												onChange={handleModalInputChange}
-												checked={modalData.is_enabled}
+												checked={modalData.is_enabled || 0}
 												name="is_enabled"
 												id="is_enabled"
 												className="form-check-input"
@@ -349,7 +353,13 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 							</div>
 						</div>
 						<div className="modal-footer">
-							<button onClick={() => handleCloseProductModal()} type="button" className="btn btn-outline-secondary">
+							<button
+								ref={closeButtonRef}
+								onClick={() => handleCloseProductModal()}
+								type="button"
+								className="btn btn-outline-secondary"
+                aria-label="Close"
+							>
 								取消
 							</button>
 							<button onClick={handleUpdateProduct} type="button" className="btn btn-primary">
@@ -361,6 +371,26 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 			</div>
 		</>
 	);
+};
+
+ProductModal.propTypes = {
+	modalMode: PropTypes.oneOfType([PropTypes.string, PropTypes.oneOf([null])]),
+	tempProduct: PropTypes.shape({
+		category: PropTypes.string,
+		content: PropTypes.string,
+		description: PropTypes.string,
+		unit: PropTypes.string,
+		title: PropTypes.string,
+		imageUrl: PropTypes.string,
+		price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+		origin_price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+		num: PropTypes.number,
+		imagesUrl: PropTypes.arrayOf(PropTypes.string),
+	}).isRequired,
+	isOpen: PropTypes.bool,
+	setIsOpen: PropTypes.func,
+	getProducts: PropTypes.func.isRequired,
+	pageInfo: PropTypes.object.isRequired,
 };
 
 export default ProductModal;

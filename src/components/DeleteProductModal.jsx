@@ -7,20 +7,13 @@ const API_BASE = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
 const DeleteProductModal = ({ tempProduct, getProducts, isOpen, setIsOpen }) => {
+	const delProductModalRef = useRef(null);
 
-	// const [modalData, setModalData] = useState(tempProduct);
-
-  const delProductModalRef = useRef(null);
-
-  useEffect(() => {
-    new Modal(delProductModalRef.current, {
-      backdrop: false,
-    });
-  }, []);
-
-	// useEffect(() => {
-	// 	setModalData({ ...tempProduct });
-	// }, [tempProduct]);
+	useEffect(() => {
+		new Modal(delProductModalRef.current, {
+			backdrop: false,
+		});
+	}, []);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -93,6 +86,26 @@ const DeleteProductModal = ({ tempProduct, getProducts, isOpen, setIsOpen }) => 
 			</div>
 		</>
 	);
+};
+
+DeleteProductModal.propTypes = {
+	tempProduct: PropTypes.shape({
+		id: PropTypes.string,
+		category: PropTypes.string,
+		content: PropTypes.string,
+		description: PropTypes.string,
+		title: PropTypes.string,
+		unit: PropTypes.string,
+		num: PropTypes.number,
+		price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+		origin_price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+		is_enabled: PropTypes.number,
+		imageUrl: PropTypes.string,
+		imagesUrl: PropTypes.array,
+	}),
+	getProducts: PropTypes.func.isRequired,
+	isOpen: PropTypes.bool.isRequired,
+	setIsOpen: PropTypes.func.isRequired,
 };
 
 export default DeleteProductModal;

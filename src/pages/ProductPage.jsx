@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect} from "react";
 import axios from "axios";
-import { Modal } from "bootstrap";
 
 import Pagination from "../components/Pagination";
 import ProductModal from "../components/ProductModal";
@@ -17,7 +16,7 @@ const defaultModalState = {
   content: "",
   is_enabled: 0,
   imagesUrl: [""],
-  customObj: "",
+  discountRange: 0,
 };
 
 const API_BASE = import.meta.env.VITE_BASE_URL;
