@@ -4,6 +4,8 @@ import axios from "axios";
 import Pagination from "../components/Pagination";
 import ProductModal from "../components/ProductModal";
 import DeleteProductModal from "../components/DeleteProductModal";
+import Toast from "../components/toast";
+
 
 const defaultModalState = {
   imageUrl: "",
@@ -133,9 +135,7 @@ const ProductPage = () => {
 				</table>
 				{pageInfo.total_pages > 2 ? (
 					<Pagination pageInfo={pageInfo} handleProductsPageChange={handleProductsPageChange} />
-				) : (
-					<></>
-				)}
+				) : null}
 			</div>
 			<ProductModal
 				modalMode={modalMode}
@@ -151,6 +151,7 @@ const ProductPage = () => {
 				isOpen={isDeleteProductModalOpen}
 				setIsOpen={setIsDeleteProductModalOpen}
 			/>
+			<Toast />
 		</>
 	);
 };

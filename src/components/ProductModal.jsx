@@ -2,11 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import { Modal } from "bootstrap";
+import { useDispatch } from "react-redux";
+import { pushMessage } from "../redux/toastSlice";
 
 const API_BASE = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
+
 const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, pageInfo }) => {
+  const dispatch = useDispatch();
 	const [modalData, setModalData] = useState(tempProduct);
 
 	useEffect(() => {
@@ -100,11 +104,22 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 					discountPercent,
 				},
 			});
-      alert(`新增產品成功!!`);
-			handleCloseProductModal();
+      dispatch(
+				pushMessage({
+					text: `新增產品成功!!`,
+					status: "success",
+				})
+			);
+      handleCloseProductModal()
 		} catch (error) {
-			console.log(`新增產品失敗: ${error.response.data.message}`);
-			alert(`新增產品失敗: ${error.response.data.message}`);
+      const { message } = error.response.data;
+			dispatch(
+				pushMessage({
+					text: message,
+					status: "failure",
+				})
+			);
+      handleCloseProductModal();
 		}
 	};
 
@@ -132,10 +147,22 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
           discountPercent: Number(modalData.discountPercent),
 				},
 			});
-      alert(`更新產品成功!!`)
+      dispatch(
+				pushMessage({
+					text: `更新產品成功!!`,
+					status: "success",
+				})
+			);
 			handleCloseProductModal();
 		} catch (error) {
-			console.log(`更新產品失敗: ${error.response.data.message}`);
+      const { message } = error.response.data;
+      dispatch(
+				pushMessage({
+					text: message,
+					status: "failure",
+				})
+			);
+      handleCloseProductModal();
 		}
 	};
 
@@ -146,7 +173,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 			await apiCall();
 			getProducts(pageInfo.current_page);
 		} catch (error) {
-			console.log(`${error.response.data.message}`);
+			console.log("Line 159: ", error);
 		}
 	};
 
