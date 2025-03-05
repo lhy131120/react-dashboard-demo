@@ -16,11 +16,11 @@ const Toast = () => {
 				const toastInstance = new BsToast(toastElement);
 				setTimeout(() => {
           toastInstance.show();
-        }, 1000);
+        }, 300);
 
 				setTimeout(() => {
 					dispatch(removeMessage(message.id));
-				}, 2000);
+				}, 3000);
 			}
 		});
 	}, [messages, dispatch]);
@@ -33,7 +33,7 @@ const Toast = () => {
 			toastInstance.hide();
 			setTimeout(() => {
 				dispatch(removeMessage(id));
-			}, 300);
+			}, 3000);
 		}
 	};
 
