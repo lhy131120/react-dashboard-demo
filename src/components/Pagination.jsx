@@ -6,9 +6,9 @@ const Pagination = ({ pageInfo, handleProductsPageChange }) => {
 				<nav>
 					<ul className="pagination">
 						<li className={`page-item ${!pageInfo.has_pre && "disabled"}`}>
-							<a onClick={(e) => handleProductsPageChange(e, pageInfo.current_page - 1)} className="page-link" href="javascript:;">
+							<button type="button" onClick={(e) => handleProductsPageChange(e, pageInfo.current_page - 1)} className="page-link" >
 								上一頁
-							</a>
+							</button>
 						</li>
 
 						{Array.from({ length: pageInfo.total_pages }).map((el, index) => (
@@ -17,16 +17,16 @@ const Pagination = ({ pageInfo, handleProductsPageChange }) => {
 								key={index}
 								className={`page-item ${pageInfo.current_page === index + 1 && "active"}`}
 							>
-								<a onClick={(e) => handleProductsPageChange(e, index + 1)} className="page-link" href="javascript:;">
+								<button type="button" onClick={(e) => handleProductsPageChange(e, index + 1)} className="page-link" >
 									{index + 1}
-								</a>
+								</button>
 							</li>
 						))}
 
 						<li className={`page-item ${!pageInfo.has_next && "disabled"}`}>
-							<a onClick={(e) => handleProductsPageChange(e, pageInfo.current_page + 1)} className="page-link" href="javascript:;">
+							<button type="button" onClick={(e) => handleProductsPageChange(e, pageInfo.current_page + 1)} className="page-link" >
 								下一頁
-							</a>
+							</button>
 						</li>
 					</ul>
 				</nav>

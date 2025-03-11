@@ -47,12 +47,6 @@ const ProductPage = ({ setIsAuth }) => {
 			// check callback data is Array or not
 			setProducts(Array.isArray(_products) ? _products : []);
 			setPageInfo(res.data.pagination);
-      dispatch(
-				pushMessage({
-					text: `已轉到第${page}頁`,
-					status: "success",
-				})
-			);
 		} catch (error) {
 			// console.log(`${error.response.data.message}`);
       const { message } = error.response.data;

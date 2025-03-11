@@ -8,9 +8,8 @@ import { pushMessage } from "../redux/toastSlice";
 const API_BASE = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
-
 const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, pageInfo }) => {
-  const dispatch = useDispatch();
+	const dispatch = useDispatch();
 	const [modalData, setModalData] = useState(tempProduct);
 
 	useEffect(() => {
@@ -20,7 +19,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 	}, [tempProduct]);
 
 	const productModalRef = useRef(null);
-  const closeButtonRef = useRef(null);
+	const closeButtonRef = useRef(null);
 
 	useEffect(() => {
 		new Modal(productModalRef.current, {
@@ -32,7 +31,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 		if (isOpen) {
 			const modal = Modal.getInstance(productModalRef.current);
 			modal.show();
-      closeButtonRef.current?.focus();
+			closeButtonRef.current?.focus();
 		}
 	}, [isOpen]);
 
@@ -104,27 +103,27 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 					discountPercent,
 				},
 			});
-      dispatch(
+			dispatch(
 				pushMessage({
 					text: `新增產品成功!!`,
 					status: "success",
 				})
 			);
-      handleCloseProductModal()
+			handleCloseProductModal();
 		} catch (error) {
-      const { message } = error.response.data;
+			const { message } = error.response.data;
 			dispatch(
 				pushMessage({
 					text: message,
 					status: "failure",
 				})
 			);
-      handleCloseProductModal();
+			// handleCloseProductModal();
 		}
 	};
 
 	const updateProduct = async () => {
-    const discountPercent = Number(modalData.discountPercent);
+		const discountPercent = Number(modalData.discountPercent);
 
 		if (isNaN(discountPercent)) {
 			alert("折扣必須是有效數字");
@@ -144,10 +143,10 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 					price: Number(modalData.price),
 					is_enabled: modalData.is_enabled ? 1 : 0,
 					imagesUrl: Array.isArray(modalData?.imagesUrl) ? modalData.imagesUrl : [],
-          discountPercent: Number(modalData.discountPercent),
+					discountPercent: Number(modalData.discountPercent),
 				},
 			});
-      dispatch(
+			dispatch(
 				pushMessage({
 					text: `更新產品成功!!`,
 					status: "success",
@@ -155,14 +154,14 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 			);
 			handleCloseProductModal();
 		} catch (error) {
-      const { message } = error.response.data;
-      dispatch(
+			const { message } = error.response.data;
+			dispatch(
 				pushMessage({
 					text: message,
 					status: "failure",
 				})
 			);
-      handleCloseProductModal();
+			// handleCloseProductModal();
 		}
 	};
 
@@ -171,12 +170,19 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 
 		try {
 			await apiCall();
-			getProducts(pageInfo.current_page);
+			await getProducts(pageInfo.current_page);
 		} catch (error) {
-			console.log("Line 159: ", error);
+			const { message } = error.response.data;
+			dispatch(
+				pushMessage({
+					text: message,
+					status: "failure",
+				})
+			);
 		}
 	};
 
+	const fileInputRef = useRef(null);
 	const handleFileChange = async (e) => {
 		// console.log(e.target);
 		const file = e.target.files[0];
@@ -185,17 +191,27 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 
 		try {
 			const res = await axios.post(`${API_BASE}/api/${API_PATH}/admin/upload`, formData);
-			const uploadImageUrl = res.data.imageUrl;
+			const uploadImageUrl = res?.data?.imageUrl;
 			setModalData({
 				...modalData,
 				imageUrl: uploadImageUrl,
 			});
 		} catch (error) {
-			console.error(error.response.data.message);
+			const { message } = error.response.data;
+			dispatch(
+				pushMessage({
+					text: message,
+					status: "failure",
+				})
+			);
+			// console.error(error.response.data.message);
+		} finally {
+			// 清空文件輸入欄位
+			if (fileInputRef.current) {
+				fileInputRef.current.value = "";
+			}
 		}
 	};
-
-
 
 	return (
 		<>
@@ -232,6 +248,7 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 											accept=".jpg,.jpeg,.png"
 											className="form-control"
 											id="fileInput"
+											ref={fileInputRef}
 										/>
 									</div>
 									<div className="mb-2">
@@ -374,8 +391,8 @@ const ProductModal = ({ modalMode, tempProduct, isOpen, setIsOpen, getProducts, 
 												id="discountPercent"
 												type="number"
 												min="0"
-                        max="99"
-                        step="1"
+												max="99"
+												step="1"
 												className="form-control"
 												placeholder="請輸入限時折扣"
 											/>

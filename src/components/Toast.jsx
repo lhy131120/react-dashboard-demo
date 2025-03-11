@@ -38,7 +38,7 @@ const Toast = () => {
 	};
 
 	return (
-		<div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 1000 }}>
+		<div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 9999 }}>
 			{messages.map((message) => (
 				<div
 					ref={(el) => (toastRefs.current[message.id] = el)}

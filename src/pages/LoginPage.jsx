@@ -10,74 +10,77 @@ import { OrbitProgress } from "react-loading-indicators";
 const API_BASE = import.meta.env.VITE_BASE_URL;
 
 const LoginPage = ({ setIsAuth }) => {
+	const dispatch = useDispatch();
 
-  const dispatch = useDispatch();
+	const [isScreenLoading, setIsScreenLoading] = useState(false);
 
-  const [isScreenLoading, setIsScreenLoading] = useState(false);
+	const [formData, setFormData] = useState({
+		username: "",
+		password: "",
+	});
 
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
+	const handleInputChange = (e) => {
+		const { id, value } = e.target;
+		setFormData({
+			...formData,
+			[id]: value,
+		});
+	};
 
-  const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    setFormData({
-      ...formData,
-      [id]: value,
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsScreenLoading(true);
-    try {
-      const res = await axios.post(`${API_BASE}/admin/signin`, formData);
-      const { expired, token } = res.data;
-      document.cookie = `hexToken=${token}; expires=${new Date(expired)}`;
-      axios.defaults.headers.common["Authorization"] = token;
-      setIsAuth(true);
-    } catch (error) {
-      // console.error(err.response.data.message);
-      const { message } = error.response.data;
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		setIsScreenLoading(true);
+		try {
+			const res = await axios.post(`${API_BASE}/admin/signin`, formData);
+			const { expired, token } = res.data;
+			document.cookie = `hexToken=${token}; expires=${new Date(expired)}`;
+			axios.defaults.headers.common["Authorization"] = token;
+			setIsAuth(true);
+		} catch (error) {
+			// console.error(err.response.data.message);
+			const { message } = error.response.data;
 			dispatch(
 				pushMessage({
 					text: message,
 					status: "failure",
 				})
 			);
-    } finally {
-      setIsScreenLoading(false);
-    }
-  };
+		} finally {
+			setIsScreenLoading(false);
+		}
+	};
 
-  const checkAdminLogin = async () => {
-    try {
-      await axios.post(`${API_BASE}/api/user/check`);
-      setIsAuth(true);
-    } catch (error) {
-      console.log(error.response.data.message);
+	const checkAdminLogin = async () => {
+		try {
+			await axios.post(`${API_BASE}/api/user/check`);
+			setIsAuth(true);
+		} catch (error) {
       setIsAuth(false);
-    }
-  };
+			const { message } = error.response.data;
+			dispatch(
+				pushMessage({
+					text: message,
+					status: "failure",
+				})
+			);
+			// console.log(error.response.data.message);
+		}
+	};
 
-  useEffect(() => {
-    const token = document.cookie.replace(
-      /(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/,
-      "$1"
-    );
+	useEffect(() => {
+		const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*=\s*([^;]*).*$)|^.*$/, "$1");
 
-    if (!token) {
-      setIsAuth(false);
-      return;
-    }
+		if (!token) {
+			setIsAuth(false);
+			return;
+		}
 
-    axios.defaults.headers.common["Authorization"] = token;
+		axios.defaults.headers.common["Authorization"] = token;
 
-    checkAdminLogin();
-  }, []);
+		checkAdminLogin();
+	}, []);
 
-  return (
+	return (
 		<>
 			<div className="container login">
 				<div className="row justify-content-center">
@@ -135,7 +138,7 @@ const LoginPage = ({ setIsAuth }) => {
 };
 
 LoginPage.propTypes = {
-	setIsAuth: PropTypes.func.isRequired
+	setIsAuth: PropTypes.func.isRequired,
 };
 
 export default LoginPage;
