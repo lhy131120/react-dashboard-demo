@@ -20,8 +20,8 @@ const toastSlice = createSlice({
 			});
 		},
 		removeMessage: (state, action) => {
-			console.log("state: ", state);
-			console.log("action: ", action);
+			// console.log("state: ", state);
+			// console.log("action: ", action);
 
 			const idToRemove = action.payload;
 			state.messages = state.messages.filter((msg) => msg.id !== idToRemove);

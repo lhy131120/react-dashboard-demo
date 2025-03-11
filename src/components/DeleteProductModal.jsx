@@ -2,11 +2,14 @@ import { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import { Modal } from "bootstrap";
+import { useDispatch } from "react-redux";
+import { pushMessage } from "../redux/toastSlice";
 
 const API_BASE = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
 const DeleteProductModal = ({ tempProduct, getProducts, isOpen, setIsOpen }) => {
+	const dispatch = useDispatch();
 	const delProductModalRef = useRef(null);
 
 	useEffect(() => {
@@ -33,8 +36,21 @@ const DeleteProductModal = ({ tempProduct, getProducts, isOpen, setIsOpen }) => 
 					imagesUrl: Array.isArray(tempProduct?.imagesUrl) ? tempProduct.imagesUrl : [],
 				},
 			});
+			dispatch(
+				pushMessage({
+					text: `產品成功刪除`,
+					status: "success",
+				})
+			);
 		} catch (error) {
-			console.log(`刪除產品失敗: ${error.response.data.message}`);
+			// console.log(`刪除產品失敗: ${error.response.data.message}`);
+			const { message } = error.response.data;
+			dispatch(
+				pushMessage({
+					text: message,
+					status: "failure",
+				})
+			);
 		}
 	};
 
@@ -44,7 +60,14 @@ const DeleteProductModal = ({ tempProduct, getProducts, isOpen, setIsOpen }) => 
 			getProducts();
 			handleCloseDeleteModal();
 		} catch (error) {
-			console.log(`Error: ${error.response.data.message}`);
+			// console.log(`Error: ${error.response.data.message}`);
+			const { message } = error.response.data;
+			dispatch(
+				pushMessage({
+					text: message,
+					status: "failure",
+				})
+			);
 		}
 	};
 

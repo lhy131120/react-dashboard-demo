@@ -6,7 +6,7 @@ const Pagination = ({ pageInfo, handleProductsPageChange }) => {
 				<nav>
 					<ul className="pagination">
 						<li className={`page-item ${!pageInfo.has_pre && "disabled"}`}>
-							<a onClick={() => handleProductsPageChange(pageInfo.current_page - 1)} className="page-link" href="#">
+							<a onClick={(e) => handleProductsPageChange(e, pageInfo.current_page - 1)} className="page-link" href="javascript:;">
 								上一頁
 							</a>
 						</li>
@@ -17,14 +17,14 @@ const Pagination = ({ pageInfo, handleProductsPageChange }) => {
 								key={index}
 								className={`page-item ${pageInfo.current_page === index + 1 && "active"}`}
 							>
-								<a onClick={() => handleProductsPageChange(index + 1)} className="page-link" href="#">
+								<a onClick={(e) => handleProductsPageChange(e, index + 1)} className="page-link" href="javascript:;">
 									{index + 1}
 								</a>
 							</li>
 						))}
 
 						<li className={`page-item ${!pageInfo.has_next && "disabled"}`}>
-							<a onClick={() => handleProductsPageChange(pageInfo.current_page + 1)} className="page-link" href="#">
+							<a onClick={(e) => handleProductsPageChange(e, pageInfo.current_page + 1)} className="page-link" href="javascript:;">
 								下一頁
 							</a>
 						</li>

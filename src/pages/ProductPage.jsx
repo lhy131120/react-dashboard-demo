@@ -1,93 +1,132 @@
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import PropTypes from "prop-types";
+import { useDispatch } from "react-redux";
+import { pushMessage } from "../redux/toastSlice";
 
 import Pagination from "../components/Pagination";
 import ProductModal from "../components/ProductModal";
 import DeleteProductModal from "../components/DeleteProductModal";
 import Toast from "../components/toast";
 
+// Loading
+import { OrbitProgress } from "react-loading-indicators";
 
 const defaultModalState = {
-  imageUrl: "",
-  title: "",
-  category: "",
-  unit: "",
-  origin_price: "",
-  price: "",
-  description: "",
-  content: "",
-  is_enabled: 0,
-  imagesUrl: [""],
-  discountPercent: "",
+	imageUrl: "",
+	title: "",
+	category: "",
+	unit: "",
+	origin_price: "",
+	price: "",
+	description: "",
+	content: "",
+	is_enabled: 0,
+	imagesUrl: [""],
+	discountPercent: "",
 };
 
 const API_BASE = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
 
-const ProductPage = () => {
-  const [products, setProducts] = useState([]);
-  const [modalMode, setModalMode] = useState(null);
-  const [tempProduct, setTempProduct] = useState({});
-  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  const [isDeleteProductModalOpen, setIsDeleteProductModalOpen] = useState(false);
+const ProductPage = ({ setIsAuth }) => {
+  const dispatch = useDispatch();
+	const [products, setProducts] = useState([]);
+	const [modalMode, setModalMode] = useState(null);
+	const [tempProduct, setTempProduct] = useState({});
+	const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+	const [isDeleteProductModalOpen, setIsDeleteProductModalOpen] = useState(false);
+	const [isScreenLoading, setIsScreenLoading] = useState(false);
 
-  const getProducts = async (page = 1) => {
-    try {
-      const res = await axios.get(
-        `${API_BASE}/api/${API_PATH}/admin/products?page=${page}`
-      );
-      // console.log(res.data);
-      const _products = res.data.products;
-      // check callback data is Array or not
-      setProducts(Array.isArray(_products) ? _products : []);
-      setPageInfo(res.data.pagination);
-    } catch (error) {
-      console.log(`${error.response.data.message}`);
-      setProducts([]);
+	const getProducts = async (page = 1) => {
+    setIsScreenLoading(true);
+		try {
+			const res = await axios.get(`${API_BASE}/api/${API_PATH}/admin/products?page=${page}`);
+			// console.log(res.data);
+			const _products = res.data.products;
+			// check callback data is Array or not
+			setProducts(Array.isArray(_products) ? _products : []);
+			setPageInfo(res.data.pagination);
+      dispatch(
+				pushMessage({
+					text: `已轉到第${page}頁`,
+					status: "success",
+				})
+			);
+		} catch (error) {
+			// console.log(`${error.response.data.message}`);
+      const { message } = error.response.data;
+			dispatch(
+				pushMessage({
+					text: message,
+					status: "failure",
+				})
+			);
+			setProducts([]);
+		} finally {
+      setIsScreenLoading(false);
     }
-  };
+	};
 
-  useEffect(() => {
-    getProducts();
-  }, []);
+	useEffect(() => {
+		getProducts();
+	}, []);
 
-  const handleOpenProductModal = (modalMode, product) => {
-    // set Modal Mode for Change Modal Title
-    modalMode === "new" ? setModalMode("new") : setModalMode("edit");
+	const handleOpenProductModal = (modalMode, product) => {
+		// set Modal Mode for Change Modal Title
+		modalMode === "new" ? setModalMode("new") : setModalMode("edit");
 
-    // if product? === edit
-    if (modalMode === "new") {
-      setTempProduct(defaultModalState);
-    } else {
-      // 檢查副圖是否存在!!!!
-      setTempProduct({
-        ...product,
-      });
+		// if product? === edit
+		if (modalMode === "new") {
+			setTempProduct({ ...defaultModalState });
+		} else {
+			// 檢查副圖是否存在!!!!
+			setTempProduct({
+				...product,
+			});
+		}
+
+		setIsProductModalOpen(true);
+	};
+
+	const handleOpenDeleteModal = (product) => {
+		if (!product) {
+			console.error("Invalid product passed to handleOpenDeleteModal");
+			return;
+		}
+		setTempProduct(product);
+		setIsDeleteProductModalOpen(true);
+	};
+
+	// // Pagination
+	const [pageInfo, setPageInfo] = useState({});
+	const handleProductsPageChange = (e, page) => {
+    
+    e.preventDefault();
+		getProducts(page);
+	};
+
+	const handleLogOut = async () => {
+    setIsScreenLoading(true);
+		try {
+			const res = await axios.post(`${API_BASE}/logout`, {});
+			console.log(res.data);
+			axios.defaults.headers.common["Authorization"] = null;
+			setIsAuth(false);
+		} catch (error) {
+			console.log(error);
+		} finally {
+      setIsScreenLoading(false);
     }
+	};
 
-    setIsProductModalOpen(true);
-  };
-
-
-  const handleOpenDeleteModal = (product) => {
-    if (!product) {
-      console.error("Invalid product passed to handleOpenDeleteModal");
-      return;
-    }
-    setTempProduct(product);
-    setIsDeleteProductModalOpen(true)
-  };
-
-  // // Pagination
-  const [pageInfo, setPageInfo] = useState({});
-  const handleProductsPageChange = (page) => {
-    getProducts(page);
-  };
-
-  return (
+	return (
 		<>
 			<div className="container">
-				<div className="text-end mt-4">
+				<div className="d-flex justify-content-end align-items-center mt-4">
+					<button onClick={() => handleLogOut()} className="btn btn-danger me-3" type="button">
+						登出
+					</button>
 					<button onClick={() => handleOpenProductModal("new")} className="btn btn-primary">
 						建立新的產品
 					</button>
@@ -152,8 +191,25 @@ const ProductPage = () => {
 				setIsOpen={setIsDeleteProductModalOpen}
 			/>
 			<Toast />
+			{isScreenLoading && (
+				<div
+					className="d-flex justify-content-center align-items-center"
+					style={{
+						position: "fixed",
+						inset: 0,
+						backgroundColor: "rgba(255,255,255,0.9)",
+						zIndex: 999,
+					}}
+				>
+					<OrbitProgress dense color="#1c211c" size="medium" text="" textColor="" />
+				</div>
+			)}
 		</>
 	);
+};
+
+ProductPage.propTypes = {
+  setIsAuth: PropTypes.func.isRequired
 };
 
 export default ProductPage;
